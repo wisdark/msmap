@@ -1,14 +1,14 @@
 # MSMAP
 
-Msmap is a Memory WebShell Generator. Compatible with various Containers, Components, Encoder, *WebShell / Proxy / Killer* and Management Clients.
+Msmap is a Memory WebShell Generator. Compatible with various Containers, Components, Encoder, *WebShell / Proxy / Killer* and Management Clients. [简体中文](README_CN.md)
 
-[简体中文](README_CN.md)
-
-[The idea behind(One)](https://hosch3n.github.io/2022/08/08/Msmap%E5%86%85%E5%AD%98%E9%A9%AC%E7%94%9F%E6%88%90%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%80%EF%BC%89/)
+[The idea behind I](https://hosch3n.github.io/2022/08/08/Msmap%E5%86%85%E5%AD%98%E9%A9%AC%E7%94%9F%E6%88%90%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%80%EF%BC%89/), [The idea behind II](https://hosch3n.github.io/2022/08/09/Msmap%E5%86%85%E5%AD%98%E9%A9%AC%E7%94%9F%E6%88%90%E6%A1%86%E6%9E%B6%EF%BC%88%E4%BA%8C%EF%BC%89/), [The idea behind III](https://hosch3n.github.io/2022/10/29/Msmap%E5%86%85%E5%AD%98%E9%A9%AC%E7%94%9F%E6%88%90%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%89%EF%BC%89/)
 
 ![](img/a.png)
 
 ![](img/b.png)
+
+![](img/c.png)
 
 <details>
 <summary>Feature [WIP]</summary>
@@ -24,14 +24,27 @@ Msmap is a Memory WebShell Generator. Compatible with various Containers, Compon
 ### Container
 
 - Java
-  - [ ] Tomcat7
+  - [x] Tomcat7
   - [x] Tomcat8
   - [x] Tomcat9
   - [x] Tomcat10
-  - [ ] Resin
-  - [ ] Weblogic
+  - [ ] Resin3
+  - [x] Resin4
+  - [ ] WebSphere
+  - [ ] GlassFish
+  - [ ] WebLogic
+  - [ ] JBoss
+  - [x] Spring*
+  - [ ] Netty
+  - [x] JVM*
 - .NET
   - [ ] IIS
+- PHP
+- Python
+
+*: SpringHandler only support for JDK8+
+
+*: Default support for `Linux Tomcat 8/9`, more versions can be adapted according to the advanced guide.
 
 ### WebShell / Proxy / Killer
 
@@ -39,14 +52,14 @@ Msmap is a Memory WebShell Generator. Compatible with various Containers, Compon
   - [x] CMD / SH
   - [x] AntSword
   - [x] JSPJS
-  - [ ] Behinder
+  - [x] Behinder
   - [x] Godzilla
-- Proxy
-  - [ ] Neo-reGeorg
-  - [ ] wsproxy
-- Killer(As-Exploits)
-  - [x] java-memshell-scanner
-  - [x] ASP.NET-Memshell-Scanner
+
+- No need for modularity
+
+~~Proxy: Neo-reGeorg, wsproxy~~
+
+~~Killer: java-memshell-scanner, ASP.NET-Memshell-Scanner~~
 
 ### Decoder / Decryptor / Hasher
 
@@ -54,6 +67,7 @@ Msmap is a Memory WebShell Generator. Compatible with various Containers, Compon
   - [x] Base64
   - [ ] Hex
 - Decryptor
+  - [x] XOR
   - [x] RC4
   - [x] AES128
   - [x] AES256
@@ -101,7 +115,11 @@ Edit `gist/java/container/tomcat/servlet.py`
 private static String pattern = "*.xml";
 ```
 
-WsFilter does not currently support automatic compilation. If an encryption encoder is used, the password needs to be the same as the path (eg `/passwd`)
+If an encryption encoder is used in WsFilter, the password needs to be the same as the path (eg `/passwd`)
+
+`gist/java/container/jdk/javax.py` with `lib/servlet-api.jar` can be replaced depending on the target container.
+
+`pip3 install pyperclip` to support automatic copying to clipboard.
 
 ## Example
 
@@ -129,6 +147,31 @@ Type **JSP** with **[rc_4_sha256](extend/AntSword/encoder/rc_4_sha256.js)** Enco
 
 `python generator.py Java Tomcat Servlet RC4 AntSword passwd`
 
+Type **JSP**  with **[xor_md5](extend/AntSword/encoder/xor_md5.js)** Encoder | AgentFiless Inject HttpServlet
+
+`python generator.py Java JDK JavaX XOR AntSword passwd`
+
+Type **JSPJS** with **[aes_128_ecb_pkcs7_padding_md5](extend/AntSword/encoder/aes_128_ecb_pkcs7_padding_md5.js)** Encoder | Inject Tomcat WsFilter
+
+`python generator.py Java Tomcat WsFilter AES128 JSPJS passwd`
+
+Type **JSPJS** with **[xor_md5](extend/AntSword/encoder/xor_md5.js)** Encoder | Inject Spring Handler
+
+`python generator.py Java Spring Handler XOR JSPJS passwd`
+
+</details>
+
+<details>
+<summary>Behinder</summary>
+
+Type **default_aes** | Inject Tomcat Valve
+
+`python generator.py Java Tomcat Valve AES128 Behinder rebeyond`
+
+Type **default_xor_base64** | Inject Spring Interceptor
+
+`python generator.py Java Spring Interceptor XOR Behinder rebeyond`
+
 </details>
 
 <details>
@@ -137,6 +180,14 @@ Type **JSP** with **[rc_4_sha256](extend/AntSword/encoder/rc_4_sha256.js)** Enco
 Type **JAVA_AES_BASE64** | Inject Tomcat Valve
 
 `python generator.py Java Tomcat Valve AES128 Godzilla superidol`
+
+Type **JAVA_AES_BASE64** | AgentFiless Inject HttpServlet
+
+`python generator.py Java JDK JavaX AES128 Godzilla superidol`
+
+Type **JAVA_AES_BASE64** | Inject Spring Handler
+
+`python generator.py Java Spring Handler AES128 Godzilla superidol`
 
 > [Known issue](https://github.com/BeichenDream/Godzilla/issues/76)
 

