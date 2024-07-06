@@ -32,7 +32,7 @@ Msmap是一个内存马生成器，兼容多种容器、组件、编码器、*We
   - [x] Resin4
   - [ ] WebSphere
   - [ ] GlassFish
-  - [ ] WebLogic
+  - [x] WebLogic
   - [ ] JBoss
   - [x] Spring*
   - [ ] Jetty
@@ -204,7 +204,8 @@ private static String pattern = "*.xml";
 
 [Behinder](https://github.com/rebeyond/Behinder) | [wsMemShell](https://github.com/veo/wsMemShell) | [ysomap](https://github.com/wh1t3p1g/ysomap)
 
-## 扩展阅读
+<details>
+<summary>扩展阅读</summary>
 
 [利用“进程注入”实现无文件复活 WebShell](https://www.freebuf.com/articles/web/172753.html)
 
@@ -230,6 +231,12 @@ private static String pattern = "*.xml";
 
 [Linux下内存马进阶植入技术](https://xz.aliyun.com/t/10186)
 
+[Spring cloud gateway通过SPEL注入内存马](https://gv7.me/articles/2022/the-spring-cloud-gateway-inject-memshell-through-spel-expressions/)
+
+[CVE-2022-22947 注入哥斯拉内存马](https://blog.wanghw.cn/tech-share/cve-2022-22947-inject-godzilla-memshell.html)
+
 [Linux下无文件Java agent探究](https://tttang.com/archive/1525/)
 
 [论如何优雅的注入Java Agent内存马](https://xz.aliyun.com/t/11640)
+
+</details>
